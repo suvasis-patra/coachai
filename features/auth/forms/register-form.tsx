@@ -17,7 +17,13 @@ import { Separator } from "@/components/ui/separator"
 import SocialAuthButtons from "../components/social-auth-buttons"
 import { AuthPage } from "../lib/constants"
 import Link from "next/link"
+import { registerUser } from "../actions/user"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 const RegisterForm = () => {
+  const router=useRouter()
+  const [isPending,setIsPending]=useState(false)
     const form = useForm<z.infer<typeof RegisterUserSchema>>({
         resolver: zodResolver(RegisterUserSchema),
         defaultValues: {
@@ -25,10 +31,22 @@ const RegisterForm = () => {
           email:"",
           password:""
         },
-      })
-     
+      }) 
       async function onSubmit(values: z.infer<typeof RegisterUserSchema>) {
-        console.log(values)
+        setIsPending(true)
+        const result= await registerUser(values)
+        if(result.success){
+          toast.success(result.message,{
+            className: "bg-green-600 text-white font-semibold",
+          })
+          form.reset()
+          router.push("/")
+        }else if(!result.success){
+          toast.error(result.message,{
+            className: "bg-red-600 text-white font-semibold",
+          })
+        }
+        setIsPending(false)
       }
   return (
     <Form {...form}>
@@ -43,7 +61,7 @@ const RegisterForm = () => {
           <FormItem>
             <FormLabel className="input-lable">Username</FormLabel>
             <FormControl>
-              <Input placeholder="Jhon doe" {...field}  className="input-field"/>
+              <Input placeholder="Jhon doe" {...field}  className="input-field" disabled={isPending}/>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -56,7 +74,7 @@ const RegisterForm = () => {
           <FormItem>
             <FormLabel className="input-lable">Email</FormLabel>
             <FormControl>
-              <Input placeholder="example@gmail.com" type="email" {...field}  className="input-field"/>
+              <Input placeholder="example@gmail.com" type="email" {...field}  className="input-field" disabled={isPending}/>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -69,14 +87,14 @@ const RegisterForm = () => {
           <FormItem>
             <FormLabel className="input-lable">Password</FormLabel>
             <FormControl>
-              <Input placeholder="******" type="password" {...field}  className="input-field"/>
+              <Input placeholder="******" type="password" {...field}  className="input-field" disabled={isPending}/>
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
       <div>
-       <Button type="submit" className="cta-btn bg-blue-700 hover:bg-blue-500 transition duration-200">register</Button>
+       <Button type="submit" className="cta-btn bg-blue-700 hover:bg-blue-500 transition duration-200" disabled={isPending}>register</Button>
       </div>
       <p className="text-center">Already have an account? <Link href={"/login"} className="underline text-blue-700">login here</Link></p>
     </form>
