@@ -127,3 +127,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components{
+  .input-field{
+    @apply w-full h-12
+  }
+  .input-lable{
+    @apply uppercase text-blue-700 font-semibold
+  }
+  .cta-btn{
+    @apply uppercase w-full cursor-pointer
+  }
+}
